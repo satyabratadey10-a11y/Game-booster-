@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FPS Booster">
+    <meta name="theme-color" content="#00ff41">
+    <meta name="description" content="Real-time FPS counter and game performance optimizer for mobile gaming">
+    <meta name="keywords" content="fps counter, game booster, performance monitor, mobile gaming">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+    
+    <title>FPS Booster - Game Performance Monitor</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 10px;
+        }
+
+        .fps-container {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .app-title {
+            font-size: 1.5em;
+            color: #00ff41;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .app-subtitle {
+            font-size: 0.8em;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .fps-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: #00ff41;
+            text-shadow: 0 0 25px rgba(0, 255, 65, 0.6);
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .fps-label {
+            font-size: 1em;
+            color: #cccccc;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            min-height: 75px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+            min-height: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0, 255, 65, 0.5);
+        }
+
+        .fps-graph {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .graph-line {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            background: #00ff41;
+            transition: height 0.2s ease;
+        }
+
+        .booster-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff6600;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+            display: none;
+        }
+
+        .booster-title {
+            font-size: 1.4em;
+            color: #ff6600;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+            font-weight: bold;
+        }
+
+        .boost-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .boost-card {
+            background: rgba(255, 102, 0, 0.15);
+            border: 2px solid #ff6600;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 95px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .boost-card:active {
+            transform: scale(0.95);
+        }
+
+        .boost-card.active {
+            background: rgba(255, 102, 0, 0.4);
+            border-color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.4);
+        }
+
+        .boost-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .boost-name {
+            font-weight: bold;
+            color: #ff6600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .boost-desc {
+            font-size: 0.7em;
+            color: #ccc;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+            padding: 0 5px;
+        }
+
+        .slider-label {
+            color: #ff6600;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6600, #ffaa00);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6600, #ffaa00);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .performance-monitor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .perf-metric {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .perf-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00ff41;
+            margin-bottom: 5px;
+        }
+
+        .perf-label {
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .boost-status {
+            background: rgba(0, 255, 65, 0.15);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+
+        .boost-status.warning {
+            background: rgba(255, 170, 0, 0.15);
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+
+        .boost-status.success {
+            background: rgba(0, 255, 65, 0.15);
+            border-color: #00ff41;
+            color: #00ff41;
+        }
+
+        .good { color: #00ff41 !important; }
+        .warning { color: #ffaa00 !important; }
+        .critical { color: #ff4444 !important; }
+
+        .overlay-mode {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff41;
+            border-radius: 15px;
+            padding: 12px;
+            z-index: 9999;
+            width: 160px;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.4);
+        }
+
+        .overlay-mode .fps-display {
+            font-size: 2.2em;
+            margin: 10px 0;
+        }
+
+        .overlay-mode .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .overlay-mode .stat-box {
+            padding: 6px;
+            min-height: auto;
+        }
+
+        .overlay-mode .stat-value {
+            font-size: 1em;
+        }
+
+        .overlay-mode .stat-label {
+            font-size: 0.65em;
+        }
+
+        .overlay-mode .controls {
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .overlay-mode .btn {
+            padding: 8px;
+            font-size: 0.75em;
+            min-height: 35px;
+        }
+
+        .overlay-mode .header,
+        .overlay-mode .fps-label,
+        .overlay-mode .booster-panel {
+            display: none;
+        }
+
+        @media screen and (orientation: landscape) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .controls {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .boost-options {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .fps-display {
+                font-size: 3em;
+            }
+            .boost-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .fps-display.critical {
+            animation: pulse 1s infinite;
+        }
+
+        .install-prompt {
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            color: #000;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .install-btn {
+            background: #000;
+            color: #00ff41;
+            border: 2px solid #00ff41;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="install-prompt" id="installPrompt">
+        📱 Install FPS Booster for faster access!
+        <div>
+            <button class="install-btn" id="installBtn">Install App</button>
+        </div>
+    </div>
+
+    <div class="fps-container" id="fpsContainer">
+        <div class="header">
+            <div class="app-title">⚡ FPS BOOSTER</div>
+            <div class="app-subtitle">GAME PERFORMANCE MONITOR</div>
+        </div>
+
+        <div class="fps-display" id="fpsDisplay">--</div>
+        <div class="fps-label">FRAMES PER SECOND</div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="avgFps">--</div>
+                <div class="stat-label">Average</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="minFps">--</div>
+                <div class="stat-label">Minimum</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="maxFps">--</div>
+                <div class="stat-label">Maximum</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="frameTime">--</div>
+                <div class="stat-label">Frame Time</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="toggleOverlay()">📍 Overlay</button>
+            <button class="btn" onclick="resetStats()">🔄 Reset</button>
+            <button class="btn" onclick="toggleGraph()">📊 Graph</button>
+            <button class="btn" onclick="toggleBooster()">🚀 Boost</button>
+        </div>
+
+        <div class="fps-graph" id="fpsGraph"></div>
+
+        <div class="booster-panel" id="boosterPanel">
+            <div class="booster-title">🚀 GAME BOOSTER</div>
+            
+            <div class="boost-options">
+                <div class="boost-card" onclick="toggleBoost('highPerformance')" id="highPerformance">
+                    <div class="boost-icon">⚡</div>
+                    <div class="boost-name">High Performance</div>
+                    <div class="boost-desc">Max CPU priority</div>
+                </div>
+                <div class="boost-card" onclick="toggleBoost('memoryCleanup')" id="memoryCleanup">
+                    <div class="boost-icon">🧹</div>
+                    <div class="boost-name">Memory Cleanup</div>
+                    <div class="boost-desc">Free up RAM</div>
+                </div>
+                <div class="boost-card" onclick="toggleBoost('gpuBoost')" id="gpuBoost">
+                    <div class="boost-icon">🎮</div>
+                    <div class="boost-name">GPU Boost</div>
+                    <div class="boost-desc">Graphics optimize</div>
+                </div>
+                <div class="boost-card" onclick="toggleBoost('networkOptimize')" id="networkOptimize">
+                    <div class="boost-icon">📡</div>
+                    <div class="boost-name">Network</div>
+                    <div class="boost-desc">Reduce latency</div>
+                </div>
+            </div>
+
+            <div class="slider-container">
+                <label class="slider-label">Performance Level</label>
+                <input type="range" min="1" max="5" value="3" class="slider" id="performanceSlider" oninput="updatePerformance(this.value)">
+                <div class="slider-labels">
+                    <span>Balanced</span>
+                    <span>Maximum</span>
+                </div>
+            </div>
+
+            <div class="performance-monitor">
+                <div class="perf-metric">
+                    <div class="perf-value" id="cpuUsage">--</div>
+                    <div class="perf-label">CPU Usage</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="memoryUsage">--</div>
+                    <div class="perf-label">Memory</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="temperature">--</div>
+                    <div class="perf-label">Temperature</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="networkLatency">--</div>
+                    <div class="perf-label">Ping</div>
+                </div>
+            </div>
+
+            <div class="boost-status success" id="boostStatus">
+                🟢 System optimized for gaming
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').style.display = 'block';
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service Worker: Registered'))
+                    .catch(err => console.log('Service Worker: Error', err));
+            });
+        }
+
+        // Global Variables
+        let fps = 0;
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fpsHistory = [];
+        let isOverlay = false;
+        let showGraph = false;
+        let graphPoints = [];
+        const maxGraphPoints = 80;
+        let showBooster = false;
+
+        let activeBoosts = {
+            highPerformance: false,
+            memoryCleanup: false,
+            gpuBoost: false,
+            networkOptimize: false
+        };
+        let performanceLevel = 3;
+        let systemMetrics = { cpu: 0, memory: 0, temperature: 0, ping: 0 };
+
+        // FPS Calculation
+        function calculateFPS() {
+            frameCount++;
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastTime;
+
+            if (deltaTime >= 1000) {
+                fps = Math.round((frameCount * 1000) / deltaTime);
+                fpsHistory.push(fps);
+                
+                if (fpsHistory.length > 300) fpsHistory.shift();
+                updateDisplay();
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+            requestAnimationFrame(calculateFPS);
+        }
+
+        function updateDisplay() {
+            const fpsEl = document.getElementById('fpsDisplay');
+            fpsEl.textContent = fps;
+            fpsEl.className = 'fps-display';
+            
+            if (fps >= 60) fpsEl.classList.add('good');
+            else if (fps >= 30) fpsEl.classList.add('warning');
+            else fpsEl.classList.add('critical');
+
+            if (fpsHistory.length > 0) {
+                const avg = Math.round(fpsHistory.reduce((a, b) => a + b) / fpsHistory.length);
+                const min = Math.min(...fpsHistory);
+                const max = Math.max(...fpsHistory);
+                const frameTime = fps > 0 ? (1000 / fps).toFixed(1) : '--';
+
+                document.getElementById('avgFps').textContent = avg;
+                document.getElementById('minFps').textContent = min;
+                document.getElementById('maxFps').textContent = max;
+                document.getElementById('frameTime').textContent = frameTime + 'ms';
+
+                if (showGraph) updateGraph();
+            }
+        }
+
+        function updateGraph() {
+            const graph = document.getElement
